@@ -259,6 +259,9 @@ const App17 = () => {
     setInputText("");
   }
 
+  // App30との比較用
+  useEffect(() => { console.log("レンダリング17") });
+
   return (<>
     <h3>App17</h3>
     <p>I love {text}!</p>
@@ -620,7 +623,7 @@ const App28 = () => {
     要素の参照を行うフックで、主にDOMへのアクセスに利用される。
     コンポーネント内で変数に値を保持することができるが、更新時に再レンダリングされないという点でuseStateと異なる。
     useRef(初期値) とするとオブジェクト {current:初期値} が返る。
-    実際は useRef(null) の後に ref で関連付けることでDOM操作を可能にする。
+    実際は useRef(null) の後に属性 ref で関連付けることでDOM操作を可能にする。
 */
 // ボタンをクリックするとフォーカスされるinput
 const App29 = () => {
@@ -637,11 +640,121 @@ const App29 = () => {
 
 /*  setボタンを押すと反映されるフォーム
     ボタンを押すまでは内部的に保持だけしておき、押したタイミングでレンダリングさせたい。
-    これをuseStateで保持すると、1文字変化ごとに再レンダリングが走ってしまう。
+    そのためにはボタンを押した際に「その時にtextboxに入っているtext」を取得する必要があるため、Refにより取得する。
+    参照:App17。こちらは1文字ごとにレンダリングが走ってしまう。
+    「コンポーネント内で値を保持したいが、それが更新されたタイミングではレンダリングしたくない」場合の例。
 */
 
 const App30 = () => {
+  const inputRefObject = React.useRef(null);
+  const [text, setText] = useState("");
+  const handleClick = () => {
+    setText(inputRefObject.current.value);
+  }
+  // 第2引数なしのuseEffectはレンダリング毎に走る
+  useEffect(() => { console.log("レンダリング30") });
+  return <>
+    <h3>App30</h3>
+    <input type="text" ref={inputRefObject} />
+    <button onClick={handleClick}>set</button>
+    <p>text: {text}</p>
+  </>
+}
 
+/*  useContext
+    子孫コンポーネントにpropsを渡したい場合、普通は子を伝ってバケツリレーする必要がある。
+    Context機能を利用することで、DOMツリー内の様々な階層からCOntextに収容されているデータへアクセスできる。
+    以下の3つが関係する
+    ・Contextオブジェクト：React.createContext() の戻り値
+    ・Providerコンポーネント：Contextオブジェクトが保持しているコンポーネント
+    ・Consumerコンポーネント：useContext()を利用してContextオブジェクトから値を取得するコンポーネント
+*/
+
+// useContextの例。
+
+// 1. まずcreateContextでcontextを使える"箱"を作る
+const SampleContextObject = React.createContext();
+
+// 3. "箱"の中の子要素からはuseContextで共有された変数を取り出せる
+const ConsumerComponent = () => {
+  const messageText = React.useContext(SampleContextObject);
+  return <p>{messageText}</p>
+}
+
+const message = "I love React!!";
+
+const App31 = () => <>
+  <h3>App31</h3>
+  {/* 2. "箱"のProviderを要素として作り、value属性で共有したい変数を指定する */}
+  <SampleContextObject.Provider value={message}>
+    <ConsumerComponent />
+  </SampleContextObject.Provider>
+</>
+
+/*  ひ孫側から操作するカウンター
+    App - CountProvider -> First -> Second -> Third(Consumer)　と受け渡す
+    countとsetCount を渡し、Third内でhandleClickを定義する
+    ※ props.childrenは特別なpropsで、その名の通り子要素を表す。
+      今までのように単独で使うタグは関係なく、挟んで使うタグに関係ある
+*/
+const CountContext = React.createContext();
+const CountProvider = ({ children }) => {
+  const [count, setCount] = useState(0);
+  return <>
+    <CountContext.Provider value={[count, setCount]}>
+      {children}
+    </CountContext.Provider>
+  </>
+}
+
+const App32Third = () => {
+  const [count, setCount] = React.useContext(CountContext);
+  const handleClick = () => { setCount(count + 1) };
+
+  return <>
+    <p>Third:{count}</p>
+    <button onClick={handleClick}>+1</button>
+  </>
+}
+
+const App32Second = () => <>  <p>Second</p>  <App32Third />  </>
+const App32First = () => <>  <p>First</p>  <App32Second />  </>
+
+const App32 = () => <>
+  <h3>App32</h3>
+  <CountProvider>
+    <App32First />
+  </CountProvider>
+</>
+
+
+/*  カスタムフック
+    関数名がuseから始まる独自のフックで、ほかのフックを呼び出せる。
+    今まで書いたコンポーネントで、returnより前をまとめるイメージ。
+    すなわちコンポーネントの見た目に依存することなくロジックを抽出できるということ。
+    可読性に加え、使いまわしの利点もある（例えば今回のinitialCOuntは今までは決め打ちだった）
+*/
+
+// カスタムフックを利用したカウンター
+
+const useCounter = (initialCount) => {
+  const [count, setCount] = useState(initialCount);
+  const countAdd = () => setCount(count + 1);
+  const countSub = () => setCount(count - 1);
+  const countReset = () => setCount(initialCount);
+  // setCountはreturnする必要はない（ここで完結しているので）
+  return { count, countAdd, countSub, countReset };
+}
+
+const App33 = () => {
+  const { count, countAdd, countSub, countReset } = useCounter(0);
+  return <>
+    <h3>App32</h3>
+    <p>現在のカウント数：{count}</p>
+    <button onClick={countAdd}>+1</button>
+    <button onClick={countSub}>-1</button>
+    <button onClick={countReset}>Reset</button>
+  </>
 }
 
 /*=====================================================*/
@@ -659,6 +772,6 @@ ReactDOM.render(<>
   <App17 />   <App18 />   <App19 />  <App20 />  <App21 /> <App22 />
   <h1>Chap.5</h1>
   <App23 /> <App24 />  <App25 />  <App26 />  <App27 />  <App28 />
-  <App29 />
+  <App29 />　<App30 />　<App31 />　<App32 />　<App33 />
 </>, document.getElementById('root')
 );
