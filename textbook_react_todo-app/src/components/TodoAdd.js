@@ -1,5 +1,15 @@
 // TODOを新規追加するコンポーネント
-export const TodoAdd = ({ buttonText, inputEl, handleAddTodoListItem }) => <>
-  <textarea ref={inputEl} />
-  <button onClick={handleAddTodoListItem}>{buttonText}</button>
-</>
+import { Textarea, Button } from "@chakra-ui/react";
+
+export const TodoAdd = ({ buttonText, inputEl, handleAddTodoListItem,
+  placeholder, leftIcon }) => <>
+    <Textarea ref={inputEl}
+      placeholder={placeholder} bgColor="white"
+      mt="8" borderColor="gray.400"
+    />
+    <Button onClick={handleAddTodoListItem}
+      colorScheme="blue" leftIcon={leftIcon} mt="8"
+    >
+      {buttonText}
+    </Button>
+  </>
