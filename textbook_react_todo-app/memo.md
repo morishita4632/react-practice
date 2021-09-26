@@ -73,3 +73,20 @@ ulid()
 1. コンポーネントごとに別ファイルに切り分ける
 
 ※ 書籍 CHAPTER 7 ではさらに`Chakra UI`を利用してデザインを組み込んでいく
+
+## Chakra UI について
+
+`Chakra UI`は、カスタマイズ可能な React UI コンポーネントライブラリ。
+概要は参考書の P334~を参照。
+`emotion`と`framer-motion`に依存しているため、一緒にインストールする。
+
+```bash
+yarn add @chakra-ui/react @emotion/react@^11 \
+@emotion/styled@^11 framer-motion@^4
+```
+
+あらかじめインストールすることで`Chakra UI icons`も利用できる。
+
+```bash
+yarn add @chakra-ui/icons
+```
