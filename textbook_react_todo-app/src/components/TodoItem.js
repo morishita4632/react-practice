@@ -1,1 +1,18 @@
 // TODO単体用のコンポーネント
+export const TodoItem = ({ todo, toggleTodoListItemStatus, deleteTodoListItem }) => {
+  // onClickに直接書くのはよくない？
+  const handleToggleTodoListItemStatus = () =>
+    toggleTodoListItemStatus(todo.id, todo.done);
+
+  const handleDeleteTodoListItem = () => deleteTodoListItem(todo.id);
+
+  return <li>
+    {todo.content}
+    <button onClick={handleToggleTodoListItemStatus}>
+      {todo.done ? "未完了リストへ" : "完了リストへ"}
+    </button>
+    <button onClick={handleDeleteTodoListItem}>
+      削除
+    </button>
+  </li>
+}

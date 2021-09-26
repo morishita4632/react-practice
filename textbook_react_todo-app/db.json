@@ -1,14 +1,9 @@
 {
   "todos": [
     {
-      "id": 1,
-      "content": "Create React app をインストールする",
-      "done": true
-    },
-    {
       "id": 2,
       "content": "JSON Server仮のAPIを作成する",
-      "done": false
+      "done": true
     },
     {
       "id": 3,
@@ -16,8 +11,8 @@
       "done": false
     },
     {
-      "content": "aa",
-      "id": "01FGEFZ130NF9XMMFGAP7YGXDQ",
+      "content": "aaa",
+      "id": "01FGG5PMENTPNH6NVG0PQPDEHD",
       "done": false
     }
   ]
